@@ -24,7 +24,9 @@ from ._contacts import (
 from ._counters import Counter, CounterType
 from ._currencies import Currency, get_currency_precision
 from ._manufacturers import Manufacturer
-from ._order_lines import OrderLine, OrderLineTax, OrderLineType
+from ._order_lines import (
+    AbstractOrderLine, OrderLine, OrderLineTax, OrderLineType
+)
 from ._orders import (
     DefaultOrderStatus, Order, OrderLogEntry, OrderStatus, OrderStatusManager,
     OrderStatusRole, PaymentStatus, ShippingStatus
@@ -69,6 +71,8 @@ from ._taxes import CustomerTaxGroup, Tax, TaxClass
 from ._units import SalesUnit
 
 __all__ = [
+    "AbstractOrderLine",
+    "AbstractPayment",
     "AnonymousContact",
     "Attribute",
     "AttributeType",
