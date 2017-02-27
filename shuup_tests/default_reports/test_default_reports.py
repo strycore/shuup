@@ -42,7 +42,7 @@ from shuup_tests.reports.test_reports import initialize_report_test
 from shuup_tests.utils.basketish_order_source import BasketishOrderSource
 
 
-class TestInfo(object):
+class InfoTest(object):
     def __init__(self, **kwargs):
         for k, v in six.iteritems(kwargs):
             setattr(self, k, v)
@@ -70,7 +70,7 @@ def initialize_simple_report(cls, data_overrides={}):
     if hasattr(response, "render"):
         response.render()
     json_data = json.loads(response.content.decode("utf-8"))
-    return TestInfo(**{
+    return InfoTest(**{
         "expected_taxful_total": expected_taxful_total,
         "expected_taxless_total": expected_taxless_total,
         "json_data": json_data,
