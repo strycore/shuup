@@ -18,14 +18,12 @@ from shuup.core.models import Shop
 class BaseCampaignForm(ShuupAdminForm):
     class Meta:
         model = None
-        exclude = ["identifier", "created_by", "modified_by", "conditions"]
+        exclude = ["identifier", "created_by", "modified_by", "conditions", "shop"]
 
     def __init__(self, **kwargs):
         self.request = kwargs.pop("request")
         self.instance = kwargs.get("instance")
         super(BaseCampaignForm, self).__init__(**kwargs)
-        self.fields["shop"].widget = forms.HiddenInput()
-        self.fields["shop"].required = False
 
     @property
     def service_provider(self):
@@ -35,9 +33,6 @@ class BaseCampaignForm(ShuupAdminForm):
     def service_provider(self, value):
         setattr(self.instance, self.service_provider_attr, value)
 
-    def clean_shop(self):
-        return Shop.objects.get_current(self.request)
-
     def clean(self):
         data = super(BaseCampaignForm, self).clean()
 
@@ -45,6 +40,9 @@ class BaseCampaignForm(ShuupAdminForm):
         end_datetime = data.get("end_datetime")
         if start_datetime and end_datetime and end_datetime < start_datetime:
             self.add_error("end_datetime", _("Campaign end date can't be before start date."))
+
+    def pre_master_save(self, instance):
+        instance.shop = Shop.objects.get_current(self.request)
 
 
 class CampaignsSelectMultipleField(Select2MultipleField):
