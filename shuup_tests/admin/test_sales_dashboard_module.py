@@ -58,10 +58,18 @@ def test_shop_overview_block(rf, admin_user):
     block = get_shop_overview_block(request)
     soup = BeautifulSoup(block.content)
     _, today_sales, mtd, ytd, totals = soup.find_all("tr")
-    assert today_sales.find_all("td")[NUM_ORDERS_COLUMN_INDEX].string == ("3" if today.day == 1 else "2")
-    assert today_sales.find_all("td")[NUM_CUSTOMERS_COLUMN_INDEX].string == ("3" if today.day == 1 else "2")
-    assert mtd.find_all("td")[NUM_ORDERS_COLUMN_INDEX].string == ("4" if today.month == 1 else "3")
-    assert mtd.find_all("td")[NUM_CUSTOMERS_COLUMN_INDEX].string == ("4" if today.month == 1 else "3")
+
+    if today.month == 1:
+        expected_order_count = 2
+        if today.day == 1:
+            expected_order_count = 4
+    else:
+        expected_order_count = 3
+
+    assert today_sales.find_all("td")[NUM_ORDERS_COLUMN_INDEX].string == str(expected_order_count)
+    assert today_sales.find_all("td")[NUM_CUSTOMERS_COLUMN_INDEX].string == str(expected_order_count)
+    assert mtd.find_all("td")[NUM_ORDERS_COLUMN_INDEX].string == str(expected_order_count)
+    assert mtd.find_all("td")[NUM_CUSTOMERS_COLUMN_INDEX].string == str(expected_order_count)
     assert ytd.find_all("td")[NUM_ORDERS_COLUMN_INDEX].string == "4"
     assert ytd.find_all("td")[NUM_CUSTOMERS_COLUMN_INDEX].string == "4"
     assert totals.find_all("td")[NUM_ORDERS_COLUMN_INDEX].string == "4"
