@@ -9,7 +9,7 @@
 from __future__ import unicode_literals
 
 from collections import OrderedDict
-from datetime import date, timedelta
+from datetime import date, time, timedelta
 from decimal import Decimal
 
 import six
@@ -25,7 +25,7 @@ from shuup.admin.dashboard import (
 from shuup.core.models import Order
 from shuup.core.pricing import TaxfulPrice
 from shuup.core.utils.query import group_by_period
-from shuup.utils.dates import get_year_and_month_format
+from shuup.utils.dates import get_year_and_month_format, local_now, to_aware
 from shuup.utils.i18n import get_current_babel_locale
 
 
@@ -229,7 +229,7 @@ def get_order_overview_for_date_range(request, start_date, end_date):
         num_orders=Count("id"),
         num_customers=Count("customer", distinct=True),
         sales=Sum("taxful_total_price_value"))
-    anon_orders = orders.since((end_date - start_date).days).filter(customer__isnull=True).aggregate(
+    anon_orders = orders_in_range.filter(customer__isnull=True).aggregate(
         num_orders=Count("id"))
     q["num_customers"] += anon_orders["num_orders"]
     q["sales"] = TaxfulPrice(q["sales"] or 0, request.session.get("admin_shop").currency)
