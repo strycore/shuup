@@ -282,22 +282,22 @@ class ShopProduct(MoneyPropped, models.Model):
             )
 
         if self.product.mode == ProductMode.SIMPLE_VARIATION_PARENT:
-            sellable = 0
+            sellable = False
             for child_product in self.product.variation_children.all():
-                if child_product.get_shop_instance(self.shop).is_orderable(
+                child_shop_product = child_product.get_shop_instance(self.shop)
+                if child_shop_product.is_orderable(
                         supplier=supplier,
                         customer=customer,
                         quantity=self.minimum_purchase_quantity,
                         allow_cache=False
                 ):
-                    sellable += 1
-
-            if sellable == 0:
+                    sellable = True
+                    break
+            if not sellable:
                 yield ValidationError(_("Product has no sellable children"), code="no_sellable_children")
-
-        if self.product.mode == ProductMode.VARIABLE_VARIATION_PARENT:
+        elif self.product.mode == ProductMode.VARIABLE_VARIATION_PARENT:
             from shuup.core.models import ProductVariationResult
-            sellable = 0
+            sellable = False
             for combo in self.product.get_all_available_combinations():
                 product_variant = ProductVariationResult.resolve(self.product, combo["variable_to_value"])
                 if not product_variant:
@@ -312,9 +312,9 @@ class ShopProduct(MoneyPropped, models.Model):
                         quantity=self.minimum_purchase_quantity,
                         allow_cache=False
                 ):
-                    sellable += 1
-
-            if sellable == 0:
+                    sellable = True
+                    break
+            if not sellable:
                 yield ValidationError(_("Product has no sellable children"), code="no_sellable_children")
 
         if self.product.is_package_parent():
